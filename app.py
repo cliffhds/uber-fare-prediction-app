@@ -7,7 +7,7 @@ import os
 import joblib
 import holidays
 import folium
-from streamlit_folium import folium_static
+import streamlit.components.v1 as components
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -242,7 +242,12 @@ with left_col:
         dash_array="6"
     ).add_to(m)
 
-    folium_static(m, width=650, height=450)
+    try:
+        # Render Folium HTML directly to avoid streamlit-folium iframe loading hangs
+        components.html(m._repr_html_(), height=470)
+    except Exception as e:
+        # Graceful fallback to native Streamlit map
+        st.map(pd.DataFrame({'lat': [p_lat, d_lat], 'lon': [p_lon, d_lon]}))
 
 with right_col:
     st.subheader("📊 Ride Diagnostics & Surges")
